@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Jasper</title>
+    <title>About me</title>
     <link rel="icon" type="image/png" href="icon.png">
     <style>
         @font-face {
@@ -79,6 +79,7 @@
             transform: translate(-50%, -50%);
             text-align: center;
             width: 100%;
+            padding: 0 10px;
         }
 
         .title {
@@ -87,6 +88,7 @@
             letter-spacing: 4px;
             animation: glow 2s ease-in-out infinite alternate;
             transition: opacity 0.3s ease, transform 0.3s ease;
+            white-space: nowrap;
         }
 
         @keyframes glow {
@@ -120,6 +122,7 @@
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.5s ease;
+            text-align: center;
         }
 
         .dialogue.visible {
@@ -180,6 +183,11 @@
             .trail-particle {
                 width: 12px;
                 height: 12px;
+            }
+            
+            .float-dot {
+                width: 4px;
+                height: 4px;
             }
         }
     </style>
@@ -400,7 +408,485 @@
             const delta = touchStartY - touchY;
             
             if (Math.abs(delta) > 5) {
-                scrollPosition += delta / 3;
+                scrollPosition += delta;
+                scrollPosition = Math.max(0, scrollPosition);
+                maxScroll = Math.max(maxScroll, scrollPosition);
+                updateContent();
+                touchStartY = touchY;
+            }
+        }, { passive: false });
+
+        function createTrailParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'trail-particle';
+            particle.style.left = (x - 4) + 'px';
+            particle.style.top = (y - 4) + 'px';
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.remove();
+                }
+            }, 800);
+        }
+
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let mouseTrailTimer = null;
+
+        document.addEventListener('mousemove', (e) => {
+            const distance = Math.sqrt(
+                Math.pow(e.clientX - lastMouseX, 2) + 
+                Math.pow(e.clientY - lastMouseY, 2)
+            );
+            
+            if (distance > 5) {
+                createTrailParticle(e.clientX, e.clientY);
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+            }
+        });
+
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches[0]) {
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches[0]) {
+                const touchX = e.touches[0].clientX;
+                const touchY = e.touches[0].clientY;
+                
+                const distance = Math.sqrt(
+                    Math.pow(touchX - lastTouchX, 2) + 
+                    Math.pow(touchY - lastTouchY, 2)
+                );
+                
+                if (distance > 8) {
+                    createTrailParticle(touchX, touchY);
+                    lastTouchX = touchX;
+                    lastTouchY = touchY;
+                }
+            }
+        });
+
+        updateContent();
+    </script<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Jasper</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <style>
+        @font-face {
+            font-family: 'Pixel';
+            src: url('pixel.ttf') format('truetype');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --text: #ffffff;
+            --accent: #00ff88;
+        }
+
+        body {
+            font-family: 'Pixel';
+            font-weight: normal;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .floating-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .float-dot {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent);
+            opacity: 0.3;
+            animation: float-up 8s linear infinite;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        .title {
+            font-size: clamp(3rem, 15vw, 8rem);
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+            animation: glow 2s ease-in-out infinite alternate;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            white-space: nowrap;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px var(--accent); }
+            to { text-shadow: 0 0 30px var(--accent), 0 0 40px var(--accent); }
+        }
+
+        .wave-text {
+            display: inline-block;
+            animation: wave 2s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .content {
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.5s ease;
+            margin-top: 40px;
+            line-height: 1.6;
+        }
+
+        .dialogue {
+            color: var(--accent);
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            margin-top: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            text-align: center;
+        }
+
+        .dialogue.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1rem;
+            opacity: 0.7;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        .trail-particle {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+            animation: trail-fade 0.8s ease-out forwards;
+            box-shadow: 0 0 6px var(--accent);
+        }
+
+        @keyframes trail-fade {
+            0% {
+                opacity: 0.9;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.2);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: clamp(2rem, 12vw, 6rem);
+                letter-spacing: 2px;
+            }
+            
+            .content {
+                font-size: clamp(1rem, 3vw, 1.5rem);
+                margin-top: 30px;
+            }
+            
+            .trail-particle {
+                width: 12px;
+                height: 12px;
+            }
+            
+            .float-dot {
+                width: 4px;
+                height: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-bg" id="floatingBg"></div>
+    
+    <div class="container">
+        <div class="title" id="title">
+            <span class="wave-text" style="animation-delay: 0s">J</span>
+            <span class="wave-text" style="animation-delay: 0.1s">A</span>
+            <span class="wave-text" style="animation-delay: 0.2s">S</span>
+            <span class="wave-text" style="animation-delay: 0.3s">P</span>
+            <span class="wave-text" style="animation-delay: 0.4s">E</span>
+            <span class="wave-text" style="animation-delay: 0.5s">R</span>
+        </div>
+        
+        <div class="content" id="content">
+            HTML Developer
+        </div>
+        
+        <div class="dialogue" id="dialogue"></div>
+    </div>
+
+    <div class="scroll-indicator" id="scrollIndicator">
+        scroll to explore ↓
+    </div>
+
+    <script>
+        let scrollPosition = 0;
+        let maxScroll = 0;
+        const scrollSensitivity = 3;
+        
+        const dialogues = [
+            "",
+            "welcome to my space",
+            "i build things with code",
+            "html, css, javascript",
+            "making the web beautiful",
+            "pixel by pixel",
+            "u reached the end",
+            "i said u reached the end",
+            "seriously stop scrolling",
+            "there's nothing more here",
+            "why are you still going?",
+            "okay fine, keep scrolling",
+            "this is getting ridiculous",
+            "do you enjoy this?",
+            "...fine, i'll keep talking",
+            "my github is not-jasper",
+            "check out my projects",
+            "they're pretty cool",
+            "better than this infinite scroll",
+            "seriously though, stop",
+            "you've got dedication",
+            "i respect that",
+            "but also...",
+            "GO TOUCH SOME GRASS",
+            "jk jk, you're cool",
+            "thanks for staying",
+            "hope you have a great day",
+            "...you're still here?",
+            "wow, okay",
+            "i'm impressed",
+            "here's a secret:",
+            "the floating dots are hypnotic",
+            "watch them for a while",
+            "very zen",
+            "okay NOW you reached the real end",
+            "...or did you?",
+            "fine, here's the REAL ending...",
+            "let's go back to the beginning"
+        ];
+
+        function createFloatingDot() {
+            const dot = document.createElement('div');
+            dot.className = 'float-dot';
+            dot.style.left = Math.random() * 100 + 'vw';
+            dot.style.animationDuration = (Math.random() * 4 + 4) + 's';
+            document.getElementById('floatingBg').appendChild(dot);
+            
+            setTimeout(() => dot.remove(), 8000);
+        }
+
+        setInterval(createFloatingDot, 200);
+
+        function handleScroll(e) {
+            e.preventDefault();
+            
+            const delta = e.deltaY || e.detail || e.wheelDelta;
+            
+            if (delta > 0) {
+                scrollPosition += scrollSensitivity;
+            } else {
+                scrollPosition -= scrollSensitivity;
+            }
+            
+            scrollPosition = Math.max(0, scrollPosition);
+            maxScroll = Math.max(maxScroll, scrollPosition);
+            
+            updateContent();
+        }
+
+        function updateContent() {
+            const title = document.getElementById('title');
+            const content = document.getElementById('content');
+            const dialogue = document.getElementById('dialogue');
+            const scrollIndicator = document.getElementById('scrollIndicator');
+            
+            const titleOpacity = Math.max(0.1, 1 - (scrollPosition / 200));
+            const titleScale = Math.max(0.5, 1 - (scrollPosition / 400));
+            title.style.opacity = titleOpacity;
+            title.style.transform = `scale(${titleScale})`;
+            
+            content.style.opacity = titleOpacity;
+            content.style.transform = `scale(${titleScale})`;
+            
+            if (scrollPosition > 100) {
+                scrollIndicator.style.opacity = '0';
+            } else {
+                scrollIndicator.style.opacity = '0.7';
+            }
+            
+            let dialogueIndex = 0;
+            let requiredScroll = 0;
+            
+            for (let i = 1; i < dialogues.length; i++) {
+                if (i <= 10) {
+                    requiredScroll = i * 100;
+                } else if (i <= 20) {
+                    requiredScroll = 1000 + (i - 10) * 150;
+                } else if (i <= 30) {
+                    requiredScroll = 2500 + (i - 20) * 200;
+                } else {
+                    requiredScroll = 4500 + (i - 30) * 300;
+                }
+                
+                if (scrollPosition >= requiredScroll) {
+                    dialogueIndex = i;
+                }
+            }
+            
+            if (dialogueIndex > 0 && dialogueIndex < dialogues.length) {
+                dialogue.textContent = dialogues[dialogueIndex];
+                dialogue.classList.add('visible');
+                
+                if (dialogueIndex >= 6) {
+                    dialogue.style.color = '#ff4444';
+                }
+                if (dialogueIndex >= 8) {
+                    dialogue.style.fontSize = 'clamp(1.2rem, 4vw, 2rem)';
+                }
+                if (dialogueIndex >= 15) {
+                    dialogue.style.color = '#ffff44';
+                }
+                if (dialogueIndex >= 23) {
+                    dialogue.style.color = '#ff44ff';
+                }
+                if (dialogueIndex >= 30) {
+                    dialogue.style.color = 'var(--accent)';
+                }
+                
+                if (dialogueIndex === dialogues.length - 1) {
+                    setTimeout(() => {
+                        resetToStart();
+                    }, 3000);
+                }
+            } else if (dialogueIndex === 0) {
+                dialogue.classList.remove('visible');
+            }
+            
+            if (dialogueIndex >= 6) {
+                scrollIndicator.style.display = 'none';
+            }
+        }
+        
+        function resetToStart() {
+            const title = document.getElementById('title');
+            const content = document.getElementById('content');
+            const dialogue = document.getElementById('dialogue');
+            const scrollIndicator = document.getElementById('scrollIndicator');
+            
+            scrollPosition = 0;
+            
+            title.style.transition = 'all 2s ease';
+            content.style.transition = 'all 2s ease';
+            dialogue.style.transition = 'all 2s ease';
+            
+            title.style.opacity = '1';
+            title.style.transform = 'scale(1)';
+            content.style.opacity = '1';
+            content.style.transform = 'scale(1)';
+            dialogue.classList.remove('visible');
+            
+            scrollIndicator.style.display = 'block';
+            scrollIndicator.style.opacity = '0.7';
+            
+            setTimeout(() => {
+                title.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                content.style.transition = 'all 0.5s ease';
+                dialogue.style.transition = 'all 0.5s ease';
+                dialogue.style.color = 'var(--accent)';
+                dialogue.style.fontSize = 'clamp(1rem, 3vw, 1.5rem)';
+            }, 2000);
+        }
+
+        document.addEventListener('wheel', handleScroll, { passive: false });
+        document.addEventListener('DOMMouseScroll', handleScroll, { passive: false });
+
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touchY = e.touches[0].clientY;
+            const delta = touchStartY - touchY;
+            
+            if (Math.abs(delta) > 5) {
+                scrollPosition += delta;
                 scrollPosition = Math.max(0, scrollPosition);
                 maxScroll = Math.max(maxScroll, scrollPosition);
                 updateContent();
